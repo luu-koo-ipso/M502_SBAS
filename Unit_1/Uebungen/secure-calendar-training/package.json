@@ -10,10 +10,10 @@
     "audit": "npm audit"
   },
   "dependencies": {
-    "axios": "0.21.1",
-    "lodash": "4.17.19",
-    "moment": "2.29.1",
-    "nanoid": "3.1.25",
+    "axios": "^1.19.0",
+    "lodash": "^4.18.1",
+    "moment": "^2.30.1",
+    "nanoid": "^6.0.1",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
@@ -21,8 +21,8 @@
     "@types/lodash": "4.14.182",
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
-    "@vitejs/plugin-react": "4.0.0",
+    "@vitejs/plugin-react": "^6.0.5",
     "typescript": "5.0.4",
-    "vite": "4.3.9"
+    "vite": "^8.2.1"
   }
 }
