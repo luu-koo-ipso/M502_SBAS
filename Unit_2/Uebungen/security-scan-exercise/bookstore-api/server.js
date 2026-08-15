@@ -4,7 +4,7 @@ const express      = require('express');
 const fs           = require('fs');
 const path         = require('path');
 const crypto       = require('crypto');
-const { exec }     = require('child_process');
+const { execFile } = require('child_process');
 const axios        = require('axios');
 const jwt          = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -165,11 +165,22 @@ app.get('/admin/users', (req, res) => {
 });
 
 // POST /admin/cmd?run=ls
-// Vulnerability: Command Injection – executes arbitrary shell commands
+// FIX (Command Injection, CWE-78): Whitelist statt exec() mit Roh-Input.
+// Nur explizit erlaubte Kommandos ohne Shell-Interpretation (execFile, feste Argumente).
+const ALLOWED_CMDS = {
+  ls:     { file: 'ls',     args: ['-la'] },
+  whoami: { file: 'whoami', args: [] },
+  date:   { file: 'date',   args: [] },
+  uptime: { file: 'uptime', args: [] },
+};
 app.post('/admin/cmd', (req, res) => {
-  const cmd = req.body.run || req.query.run;
-  // Direct exec with user input – Command Injection
-  exec(cmd, (err, stdout, stderr) => {
+  const key = req.body.run || req.query.run;
+  const allowed = ALLOWED_CMDS[key];
+  if (!allowed) {
+    return res.status(400).json({ error: 'Command not allowed', allowed: Object.keys(ALLOWED_CMDS) });
+  }
+  // execFile ohne Shell → keine Metazeichen-Interpretation, kein Command Injection
+  execFile(allowed.file, allowed.args, (err, stdout, stderr) => {
     res.json({ stdout, stderr, error: err ? err.message : null });
   });
 });
@@ -179,11 +190,16 @@ app.post('/admin/cmd', (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // GET /files?name=readme.txt
-// Vulnerability: Path Traversal – no path sanitization
+// FIX (Path Traversal, CWE-23): path.resolve + Prefix-Check.
+// Der aufgelöste Pfad muss innerhalb von public/ bleiben, sonst 403.
 app.get('/files', (req, res) => {
-  const fileName = req.query.name;
-  // No sanitization → ../../etc/passwd works
-  const filePath = path.join(__dirname, 'public', fileName);
+  const fileName = req.query.name || '';
+  const publicDir = path.resolve(__dirname, 'public');
+  const filePath  = path.resolve(publicDir, fileName);
+  // Ausbruch aus public/ verhindern (verhindert ../../etc/passwd)
+  if (filePath !== publicDir && !filePath.startsWith(publicDir + path.sep)) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) return res.status(404).json({ error: 'File not found' });
     res.send(data);
