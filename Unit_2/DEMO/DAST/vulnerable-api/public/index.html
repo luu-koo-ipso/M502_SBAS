@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VulnerableApp – DAST Training</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; }
+    header { background: #c0392b; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    header h1 { color: #fff; font-size: 1.3rem; }
+    .badge { background: #e74c3c; color: #fff; font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; border: 1px solid #ff6b6b; }
+    nav { background: #16213e; display: flex; flex-wrap: wrap; gap: 2px; padding: 6px 10px; border-bottom: 2px solid #0f3460; }
+    nav button { background: #0f3460; color: #a0c4ff; border: none; padding: 7px 14px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+    nav button.active { background: #e94560; color: #fff; }
+    nav button:hover { background: #e94560; color: #fff; }
+    .container { max-width: 960px; margin: 20px auto; padding: 0 16px; }
+    .tab { display: none; }
+    .tab.active { display: block; }
+    .card { background: #16213e; border: 1px solid #0f3460; border-radius: 6px; padding: 18px; margin-bottom: 16px; }
+    .card h3 { color: #e94560; margin-bottom: 10px; font-size: 1rem; }
+    .vuln-label { font-size: 0.75rem; background: #7f1d1d; color: #fca5a5; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
+    label { display: block; font-size: 0.82rem; color: #9ca3af; margin: 8px 0 3px; }
+    input, textarea, select { width: 100%; padding: 7px 10px; background: #0f3460; border: 1px solid #1e4d8c; border-radius: 4px; color: #e0e0e0; font-size: 0.9rem; }
+    input:focus, textarea:focus { outline: none; border-color: #e94560; }
+    button[type=submit], .btn { background: #e94560; color: #fff; border: none; padding: 8px 18px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-top: 8px; }
+    button[type=submit]:hover, .btn:hover { background: #c0392b; }
+    .result { margin-top: 12px; background: #0a0a1a; border: 1px solid #1e4d8c; border-radius: 4px; padding: 10px; font-family: monospace; font-size: 0.8rem; color: #a0ff9a; min-height: 40px; white-space: pre-wrap; word-break: break-all; max-height: 300px; overflow-y: auto; }
+    .result.error { color: #ff6b6b; }
+    .links a { display: inline-block; margin: 4px; color: #60a5fa; text-decoration: none; font-size: 0.82rem; background: #0f3460; padding: 4px 10px; border-radius: 3px; }
+    .links a:hover { background: #1e4d8c; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 8px; }
+    th { background: #0f3460; color: #a0c4ff; padding: 6px 10px; text-align: left; }
+    td { padding: 5px 10px; border-bottom: 1px solid #1e3060; }
+    tr:hover td { background: #0f2040; }
+    .info { color: #fbbf24; font-size: 0.8rem; margin-top: 6px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media(max-width:640px){ .grid2 { grid-template-columns: 1fr; } }
+    .comment { background: #0f1e3a; border-left: 3px solid #e94560; padding: 6px 10px; margin: 4px 0; border-radius: 3px; }
+    .comment .meta { font-size: 0.75rem; color: #6b7280; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>⚠ VulnerableApp</h1>
+  <span class="badge">INTENTIONALLY INSECURE</span>
+  <span style="margin-left:auto;font-size:0.8rem;color:#ffaaaa;">For DAST Training · OWASP ZAP Demo · Port 3000</span>
+</header>
+
+<nav>
+  <button class="active" onclick="showTab('auth')">🔐 Auth</button>
+  <button onclick="showTab('sqli')">💉 SQL Injection</button>
+  <button onclick="showTab('xss')">📜 XSS</button>
+  <button onclick="showTab('access')">🚪 Access Control</button>
+  <button onclick="showTab('injection')">⚡ Command Inj.</button>
+  <button onclick="showTab('traversal')">📁 Path Traversal</button>
+  <button onclick="showTab('redirect')">↪ Redirect / SSRF</button>
+  <button onclick="showTab('info')">🔍 Info Disclosure</button>
+  <button onclick="showTab('blog')">📝 Blog (Stored XSS)</button>
+  <button onclick="showTab('endpoints')">🗂 Endpoints</button>
+</nav>
+
+<div class="container">
+
+  <!-- ══════════════════ AUTH ══════════════════ -->
+  <div id="tab-auth" class="tab active">
+
+    <div class="grid2">
+      <div class="card">
+        <h3>Login (POST) <span class="vuln-label">A07 · SQL Injection</span></h3>
+        <p class="info">Payload: <code>admin'--</code> as username (any password)</p>
+        <form id="loginForm" action="/api/login" method="post">
+          <label>Username</label>
+          <input name="username" id="loginUser" value="admin" placeholder="admin'--">
+          <label>Password</label>
+          <input name="password" id="loginPass" value="admin123" type="password">
+          <button type="submit">Login</button>
+        </form>
+        <div class="result" id="loginResult">–</div>
+      </div>
+
+      <div class="card">
+        <h3>Register <span class="vuln-label">A04 · No Policy</span></h3>
+        <p class="info">No password policy, no validation</p>
+        <form id="registerForm">
+          <label>Username</label>
+          <input id="regUser" placeholder="newuser">
+          <label>Password</label>
+          <input id="regPass" placeholder="1" type="password">
+          <label>Email</label>
+          <input id="regEmail" placeholder="x@x.x">
+          <button type="submit">Register</button>
+        </form>
+        <div class="result" id="registerResult">–</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Login via GET <span class="vuln-label">A02 · Credentials in URL</span></h3>
+      <p class="info">Credentials visible in URL, browser history, server logs</p>
+      <div class="links">
+        <a href="/api/login?username=admin&password=admin123" target="_blank">/api/login?username=admin&password=admin123</a>
+        <a href="/api/login?username=alice&password=Password1" target="_blank">/api/login?username=alice&password=Password1</a>
+        <a href="/api/login?username=admin'--&password=x" target="_blank">SQL Injection: admin'--</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════ SQL INJECTION ══════════════════ -->
+  <div id="tab-sqli" class="tab">
+
+    <div class="card">
+      <h3>User Search <span class="vuln-label">A03 · SQL Injection</span></h3>
+      <p class="info">Payload: <code>' OR '1'='1</code> &nbsp;|&nbsp; <code>' UNION SELECT 1,username,password,email,role,token FROM users--</code></p>
+      <form id="userSearchForm" action="/api/users/search" method="get">
+        <label>Search (q=)</label>
+        <input name="q" id="userQ" placeholder="alice  OR try: ' OR '1'='1">
+        <button type="submit">Search</button>
+      </form>
+      <div class="result" id="userSearchResult">–</div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>Post Search <span class="vuln-label">A03 · SQL Injection</span></h3>
+        <p class="info">Two injectable parameters: q and author</p>
+        <form id="postSearchForm" action="/api/posts/search" method="get">
+          <label>Keyword (q=)</label>
+          <input name="q" id="postQ" placeholder="welcome">
+          <label>Author</label>
+          <input name="author" id="postAuthor" placeholder="admin">
+          <button type="submit">Search</button>
+        </form>
+        <div class="result" id="postSearchResult">–</div>
+      </div>
+
+      <div class="card">
+        <h3>Order Search <span class="vuln-label">A03 · SQL Injection</span></h3>
+        <form id="orderSearchForm" action="/api/orders/search" method="get">
+          <label>Item (item=)</label>
+          <input name="item" id="orderItem" placeholder="Premium">
+          <button type="submit">Search</button>
+        </form>
+        <div class="result" id="orderSearchResult">–</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════ XSS ══════════════════ -->
+  <div id="tab-xss" class="tab">
+
+    <div class="card">
+      <h3>Reflected XSS – Search <span class="vuln-label">A03 · Reflected XSS</span></h3>
+      <p class="info">Payload: <code>&lt;script&gt;alert(1)&lt;/script&gt;</code></p>
+      <form action="/search" method="get" target="_blank">
+        <label>Search Query (q=)</label>
+        <input name="q" value="<script>alert('XSS')</script>">
+        <label>Filter</label>
+        <input name="filter" value="all">
+        <button type="submit">Open Search Page</button>
+      </form>
+      <div class="links">
+        <a href='/search?q=<script>alert(1)</script>' target="_blank">Quick test: alert(1)</a>
+        <a href='/search?q=<img src=x onerror=alert(document.cookie)>' target="_blank">Cookie steal</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Reflected XSS – Profile <span class="vuln-label">A03 · Reflected XSS</span></h3>
+      <form action="/user/profile" method="get" target="_blank">
+        <label>Name (name=)</label>
+        <input name="name" value="<b>Alice</b>">
+        <label>Message (msg=)</label>
+        <input name="msg" value="<script>alert('profile xss')</script>">
+        <button type="submit">Open Profile</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>Reflected XSS – Error Page <span class="vuln-label">A03 · Reflected XSS</span></h3>
+      <form action="/error" method="get" target="_blank">
+        <label>Error Code</label>
+        <input name="code" value="500">
+        <label>Message (msg=)</label>
+        <input name="msg" value="<script>alert('error xss')</script>">
+        <button type="submit">Open Error Page</button>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════ ACCESS CONTROL ══════════════════ -->
+  <div id="tab-access" class="tab">
+
+    <div class="card">
+      <h3>IDOR – Get Any User <span class="vuln-label">A01 · IDOR · A02 · Plaintext Password</span></h3>
+      <p class="info">No authentication required. Try IDs 1–4.</p>
+      <form id="idorForm">
+        <label>User ID</label>
+        <input id="idorId" type="number" value="1" min="1">
+        <button type="submit">Get User</button>
+      </form>
+      <div class="result" id="idorResult">–</div>
+    </div>
+
+    <div class="card">
+      <h3>Admin Panel – All Users <span class="vuln-label">A01 · Missing Auth</span></h3>
+      <p class="info">Admin endpoint accessible without any token or login</p>
+      <button class="btn" onclick="apiGet('/api/admin/users','adminUsersResult')">Load All Users</button>
+      <div class="result" id="adminUsersResult">–</div>
+    </div>
+
+    <div class="card">
+      <h3>Admin – All Orders <span class="vuln-label">A01 · Missing Auth</span></h3>
+      <button class="btn" onclick="apiGet('/api/admin/orders','adminOrdersResult')">Load All Orders</button>
+      <div class="result" id="adminOrdersResult">–</div>
+    </div>
+
+    <div class="card">
+      <h3>CSRF – Transfer Funds <span class="vuln-label">A08 · No CSRF Token</span></h3>
+      <p class="info">No CSRF protection – state-changing action via any origin</p>
+      <form id="csrfForm">
+        <label>From User ID</label>
+        <input id="csrfFrom" value="2">
+        <label>To User ID</label>
+        <input id="csrfTo" value="1">
+        <label>Amount</label>
+        <input id="csrfAmount" value="100">
+        <button type="submit">Transfer</button>
+      </form>
+      <div class="result" id="csrfResult">–</div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════ COMMAND INJECTION ══════════════════ -->
+  <div id="tab-injection" class="tab">
+
+    <div class="card">
+      <h3>Ping <span class="vuln-label">A03 · Command Injection</span></h3>
+      <p class="info">Windows payload: <code>127.0.0.1 &amp; whoami</code> &nbsp;|&nbsp; <code>127.0.0.1 &amp;&amp; ipconfig</code></p>
+      <form id="pingForm" action="/api/ping" method="get">
+        <label>Host</label>
+        <input name="host" id="pingHost" value="127.0.0.1" placeholder="127.0.0.1 & whoami">
+        <button type="submit">Ping</button>
+      </form>
+      <div class="result" id="pingResult">–</div>
+    </div>
+
+    <div class="card">
+      <h3>NSLookup <span class="vuln-label">A03 · Command Injection</span></h3>
+      <p class="info">Payload: <code>localhost &amp; dir C:\</code></p>
+      <form id="nslookupForm" action="/api/nslookup" method="get">
+        <label>Host</label>
+        <input name="host" id="nsHost" value="localhost">
+        <button type="submit">Lookup</button>
+      </form>
+      <div class="result" id="nslookupResult">–</div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════ PATH TRAVERSAL ══════════════════ -->
+  <div id="tab-traversal" class="tab">
+
+    <div class="card">
+      <h3>File Reader <span class="vuln-label">Path Traversal</span></h3>
+      <p class="info">Payloads: <code>../server.js</code> &nbsp; <code>../config.json</code> &nbsp; <code>../package.json</code> &nbsp; <code>../../Windows/System32/drivers/etc/hosts</code></p>
+      <form id="fileForm" action="/api/files" method="get">
+        <label>Filename (name=)</label>
+        <input name="name" id="fileName" value="readme.txt" placeholder="../server.js">
+        <button type="submit">Read File</button>
+      </form>
+      <div class="result" id="fileResult">–</div>
+      <div class="links" style="margin-top:10px">
+        <a href="/api/files?name=readme.txt" target="_blank">readme.txt</a>
+        <a href="/api/files?name=users.csv" target="_blank">users.csv</a>
+        <a href="/api/files?name=api-keys.txt" target="_blank">api-keys.txt</a>
+        <a href="/api/files?name=../server.js" target="_blank">../server.js</a>
+        <a href="/api/files?name=../config.json" target="_blank">../config.json</a>
+        <a href="/api/files?name=../package.json" target="_blank">../package.json</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════ REDIRECT / SSRF ══════════════════ -->
+  <div id="tab-redirect" class="tab">
+
+    <div class="card">
+      <h3>Open Redirect <span class="vuln-label">Open Redirect</span></h3>
+      <p class="info">No URL validation – redirect to arbitrary external site</p>
+      <form id="redirectForm" action="/redirect" method="get" target="_blank">
+        <label>Target URL (url=)</label>
+        <input name="url" value="https://evil.example.com">
+        <button type="submit">Redirect</button>
+      </form>
+      <div class="links">
+        <a href="/redirect?url=https://evil.example.com" target="_blank">/redirect → evil.example.com</a>
+        <a href="/go?target=https://attacker.example.com" target="_blank">/go → attacker.example.com</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>SSRF – Fetch URL <span class="vuln-label">A10 · SSRF</span></h3>
+      <p class="info">Server fetches any URL you specify. Try internal resources: <code>http://127.0.0.1:3000/api/config</code></p>
+      <form id="ssrfForm">
+        <label>URL to fetch</label>
+        <input id="ssrfUrl" value="http://127.0.0.1:3000/api/config" placeholder="http://169.254.169.254/latest/meta-data/">
+        <button type="submit">Fetch</button>
+      </form>
+      <div class="result" id="ssrfResult">–</div>
+    </div>
+
+    <div class="card">
+      <h3>SSRF – Webhook Callback <span class="vuln-label">A10 · SSRF</span></h3>
+      <form id="webhookForm">
+        <label>Callback URL</label>
+        <input id="webhookUrl" value="http://127.0.0.1:3000/api/debug">
+        <label>Data (JSON)</label>
+        <input id="webhookData" value='{"event":"test"}'>
+        <button type="submit">Send Webhook</button>
+      </form>
+      <div class="result" id="webhookResult">–</div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════ INFORMATION DISCLOSURE ══════════════════ -->
+  <div id="tab-info" class="tab">
+
+    <div class="card">
+      <h3>Debug Endpoint <span class="vuln-label">A05 · Info Disclosure</span></h3>
+      <p class="info">Returns all env vars, OS info, and ALL users with plaintext passwords</p>
+      <div class="links">
+        <a href="/api/debug" target="_blank">/api/debug</a>
+        <a href="/api/config" target="_blank">/api/config</a>
+        <a href="/api/error-demo" target="_blank">/api/error-demo (stack trace)</a>
+        <a href="/api/routes" target="_blank">/api/routes (all endpoints)</a>
+      </div>
+      <button class="btn" onclick="apiGet('/api/config','infoConfigResult')">Load /api/config</button>
+      <div class="result" id="infoConfigResult">–</div>
+    </div>
+
+    <div class="card">
+      <h3>Security Headers Check <span class="vuln-label">A05 · Missing Headers</span></h3>
+      <p class="info">The following headers are intentionally missing or insecure:</p>
+      <ul style="font-size:0.82rem;color:#fca5a5;padding-left:20px;line-height:1.8">
+        <li>Content-Security-Policy (CSP) – missing</li>
+        <li>X-Frame-Options – missing (clickjacking possible)</li>
+        <li>X-Content-Type-Options – missing</li>
+        <li>Strict-Transport-Security (HSTS) – missing</li>
+        <li>Referrer-Policy – missing</li>
+        <li>Permissions-Policy – missing</li>
+        <li>X-Powered-By: Express – exposed</li>
+        <li>CORS: Access-Control-Allow-Origin: * – wildcard</li>
+        <li>Set-Cookie: no HttpOnly / Secure / SameSite flags</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════ BLOG (STORED XSS) ══════════════════ -->
+  <div id="tab-blog" class="tab">
+
+    <div class="card">
+      <h3>Create Post <span class="vuln-label">A03 · Stored XSS</span></h3>
+      <p class="info">Content is stored without sanitization and rendered as HTML</p>
+      <form id="postForm">
+        <label>Title</label>
+        <input id="postTitle" value="Test Post">
+        <label>Content (try XSS payload)</label>
+        <textarea id="postContent" rows="3" placeholder='<script>alert("stored xss")</script>'><img src=x onerror="alert('Stored XSS!')"></textarea>
+        <label>Author</label>
+        <input id="postAuthorInput" value="attacker">
+        <button type="submit">Publish Post</button>
+      </form>
+      <div class="result" id="postResult">–</div>
+    </div>
+
+    <div class="card">
+      <h3>All Posts <span class="vuln-label">Stored XSS rendered here</span></h3>
+      <button class="btn" onclick="loadPosts()">Load Posts</button>
+      <div id="postsContainer" style="margin-top:10px"></div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════ ENDPOINTS ══════════════════ -->
+  <div id="tab-endpoints" class="tab">
+    <div class="card">
+      <h3>All API Endpoints</h3>
+      <table>
+        <tr><th>Method</th><th>Path</th><th>Vulnerability</th></tr>
+        <tr><td>POST</td><td>/api/login</td><td>SQL Injection, Plaintext PW, No HttpOnly Cookie</td></tr>
+        <tr><td>GET</td><td>/api/login?username=&password=</td><td>Credentials in URL, SQL Injection</td></tr>
+        <tr><td>POST</td><td>/api/register</td><td>No password policy, predictable token</td></tr>
+        <tr><td>GET</td><td>/api/users/search?q=</td><td>SQL Injection</td></tr>
+        <tr><td>GET</td><td>/api/users/:id</td><td>IDOR, returns plaintext password</td></tr>
+        <tr><td>PUT</td><td>/api/users/:id</td><td>No auth – anyone can update any user</td></tr>
+        <tr><td>GET</td><td>/api/admin/users</td><td>Missing auth, returns all passwords</td></tr>
+        <tr><td>DELETE</td><td>/api/admin/users/:id</td><td>Missing auth</td></tr>
+        <tr><td>GET</td><td>/api/admin/orders</td><td>Missing auth</td></tr>
+        <tr><td>GET</td><td>/api/posts/search?q=&author=</td><td>SQL Injection (2 params)</td></tr>
+        <tr><td>GET</td><td>/api/orders/search?item=</td><td>SQL Injection</td></tr>
+        <tr><td>GET/POST</td><td>/api/posts</td><td>Stored XSS</td></tr>
+        <tr><td>GET/POST</td><td>/api/posts/:id/comments</td><td>Stored XSS</td></tr>
+        <tr><td>GET</td><td>/search?q=&filter=</td><td>Reflected XSS (2 params)</td></tr>
+        <tr><td>GET</td><td>/user/profile?name=&msg=</td><td>Reflected XSS (2 params)</td></tr>
+        <tr><td>GET</td><td>/error?code=&msg=</td><td>Reflected XSS</td></tr>
+        <tr><td>GET</td><td>/api/ping?host=</td><td>Command Injection</td></tr>
+        <tr><td>GET</td><td>/api/nslookup?host=</td><td>Command Injection</td></tr>
+        <tr><td>GET</td><td>/api/files?name=</td><td>Path Traversal</td></tr>
+        <tr><td>GET</td><td>/redirect?url=</td><td>Open Redirect</td></tr>
+        <tr><td>GET</td><td>/go?target=</td><td>Open Redirect</td></tr>
+        <tr><td>GET</td><td>/api/fetch?url=</td><td>SSRF</td></tr>
+        <tr><td>POST</td><td>/api/webhook</td><td>SSRF</td></tr>
+        <tr><td>GET</td><td>/api/debug</td><td>Info disclosure (env vars, all passwords)</td></tr>
+        <tr><td>GET</td><td>/api/config</td><td>Hardcoded secrets exposed</td></tr>
+        <tr><td>GET</td><td>/api/error-demo</td><td>Stack trace + credentials in error</td></tr>
+        <tr><td>POST</td><td>/api/transfer</td><td>CSRF (no token)</td></tr>
+        <tr><td>*</td><td>/api/bypass</td><td>HTTP verb tampering</td></tr>
+      </table>
+      <div class="links" style="margin-top:12px">
+        <a href="/api/routes" target="_blank">JSON: /api/routes</a>
+        <a href="/api/debug" target="_blank">/api/debug</a>
+        <a href="/api/config" target="_blank">/api/config</a>
+        <a href="/api/admin/users" target="_blank">/api/admin/users</a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+  // ── Tab switching ──────────────────────────────────────────────────────────
+  function showTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // ── Generic helpers ────────────────────────────────────────────────────────
+  function showResult(id, data, isError) {
+    const el = document.getElementById(id);
+    el.textContent = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+    el.className = 'result' + (isError ? ' error' : '');
+  }
+
+  async function apiGet(url, resultId) {
+    try {
+      const r = await fetch(url);
+      const d = await r.json();
+      showResult(resultId, d);
+    } catch(e) { showResult(resultId, e.message, true); }
+  }
+
+  async function apiPost(url, body, resultId) {
+    try {
+      const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      const d = await r.json().catch(() => r.text());
+      showResult(resultId, d);
+    } catch(e) { showResult(resultId, e.message, true); }
+  }
+
+  // ── Login form ─────────────────────────────────────────────────────────────
+  document.getElementById('loginForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    await apiPost('/api/login',
+      { username: document.getElementById('loginUser').value, password: document.getElementById('loginPass').value },
+      'loginResult');
+  });
+
+  // ── Register form ──────────────────────────────────────────────────────────
+  document.getElementById('registerForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    await apiPost('/api/register',
+      { username: document.getElementById('regUser').value, password: document.getElementById('regPass').value, email: document.getElementById('regEmail').value },
+      'registerResult');
+  });
+
+  // ── User search ────────────────────────────────────────────────────────────
+  document.getElementById('userSearchForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    await apiGet('/api/users/search?q=' + encodeURIComponent(document.getElementById('userQ').value), 'userSearchResult');
+  });
+
+  // ── Post search ────────────────────────────────────────────────────────────
+  document.getElementById('postSearchForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    await apiGet(`/api/posts/search?q=${encodeURIComponent(document.getElementById('postQ').value)}&author=${encodeURIComponent(document.getElementById('postAuthor').value)}`, 'postSearchResult');
+  });
+
+  // ── Order search ───────────────────────────────────────────────────────────
+  document.getElementById('orderSearchForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    await apiGet('/api/orders/search?item=' + encodeURIComponent(document.getElementById('orderItem').value), 'orderSearchResult');
+  });
+
+  // ── IDOR ───────────────────────────────────────────────────────────────────
+  document.getElementById('idorForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    await apiGet('/api/users/' + document.getElementById('idorId').value, 'idorResult');
+  });
+
+  // ── CSRF transfer ──────────────────────────────────────────────────────────
+  document.getElementById('csrfForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    await apiPost('/api/transfer',
+      { from_user: document.getElementById('csrfFrom').value, to_user: document.getElementById('csrfTo').value, amount: document.getElementById('csrfAmount').value },
+      'csrfResult');
+  });
+
+  // ── Ping ───────────────────────────────────────────────────────────────────
+  document.getElementById('pingForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    showResult('pingResult', 'Running...');
+    await apiGet('/api/ping?host=' + encodeURIComponent(document.getElementById('pingHost').value), 'pingResult');
+  });
+
+  // ── NSLookup ───────────────────────────────────────────────────────────────
+  document.getElementById('nslookupForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    showResult('nslookupResult', 'Running...');
+    await apiGet('/api/nslookup?host=' + encodeURIComponent(document.getElementById('nsHost').value), 'nslookupResult');
+  });
+
+  // ── File reader ────────────────────────────────────────────────────────────
+  document.getElementById('fileForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    try {
+      const r = await fetch('/api/files?name=' + encodeURIComponent(document.getElementById('fileName').value));
+      const t = await r.text();
+      showResult('fileResult', t, !r.ok);
+    } catch(e) { showResult('fileResult', e.message, true); }
+  });
+
+  // ── SSRF fetch ─────────────────────────────────────────────────────────────
+  document.getElementById('ssrfForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    showResult('ssrfResult', 'Fetching...');
+    try {
+      const r = await fetch('/api/fetch?url=' + encodeURIComponent(document.getElementById('ssrfUrl').value));
+      const t = await r.text();
+      showResult('ssrfResult', t, !r.ok);
+    } catch(e) { showResult('ssrfResult', e.message, true); }
+  });
+
+  // ── Webhook ────────────────────────────────────────────────────────────────
+  document.getElementById('webhookForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    await apiPost('/api/webhook',
+      { callback_url: document.getElementById('webhookUrl').value, data: JSON.parse(document.getElementById('webhookData').value || '{}') },
+      'webhookResult');
+  });
+
+  // ── Create post ────────────────────────────────────────────────────────────
+  document.getElementById('postForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    await apiPost('/api/posts',
+      { title: document.getElementById('postTitle').value, content: document.getElementById('postContent').value, author: document.getElementById('postAuthorInput').value },
+      'postResult');
+  });
+
+  // ── Load & render posts (renders stored XSS) ──────────────────────────────
+  async function loadPosts() {
+    try {
+      const r = await fetch('/api/posts');
+      const posts = await r.json();
+      const container = document.getElementById('postsContainer');
+      container.innerHTML = posts.map(p => `
+        <div class="card" style="margin-bottom:8px">
+          <strong>${p.title}</strong> <span style="font-size:0.75rem;color:#6b7280">by ${p.author}</span>
+          <div style="margin-top:6px;font-size:0.85rem">${p.content}</div>
+        </div>`).join('');
+    } catch(e) {
+      document.getElementById('postsContainer').textContent = e.message;
+    }
+  }
+</script>
+</body>
+</html>

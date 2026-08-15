@@ -1,0 +1,6 @@
+id,username,password,email,role
+1,admin,admin123,admin@corp.local,admin
+2,alice,Password1,alice@corp.local,user
+3,bob,qwerty123,bob@corp.local,user
+4,charlie,123456,charlie@corp.local,user
+5,serviceaccount,Serv!ce2024,svc@corp.local,service

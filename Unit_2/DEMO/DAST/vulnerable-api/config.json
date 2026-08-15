@@ -1,0 +1,24 @@
+{
+  "app": "VulnerableApp",
+  "env": "production",
+  "database": {
+    "url": "sqlite://./data.db",
+    "backup_url": "mysql://admin:Secr3tDB@db.internal:3306/production"
+  },
+  "auth": {
+    "jwt_secret": "supersecretjwtkey_do_not_share",
+    "admin_token": "tok_admin_secret_a1b2c3",
+    "session_secret": "session_secret_change_me"
+  },
+  "smtp": {
+    "host": "mail.internal",
+    "user": "noreply@corp.local",
+    "password": "mailpass_Secr3t"
+  },
+  "api_keys": {
+    "stripe": "sk_test_DEMO_KEY_REPLACE_ME",
+    "sendgrid": "SG.FakeApiKey789ghi.FakeSecretToken",
+    "aws_access_key": "AKIAIOSFODNN7EXAMPLE",
+    "aws_secret": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+  }
+}
