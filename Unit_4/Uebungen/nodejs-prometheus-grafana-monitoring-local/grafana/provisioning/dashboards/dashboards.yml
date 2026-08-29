@@ -1,0 +1,12 @@
+apiVersion: 1
+
+providers:
+  - name: "Monitoring Demo Dashboards"
+    orgId: 1
+    folder: "Monitoring Demo"
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: C:\ifa\M502_SBAS\Unit_4\Uebungen\nodejs-prometheus-grafana-monitoring-local\grafana\dashboards

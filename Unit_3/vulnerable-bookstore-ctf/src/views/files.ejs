@@ -1,0 +1,40 @@
+<%- include('layout', { title: 'Debug Info' }) %>
+
+<div class="card">
+  <h2>&#128027; Debug Error Information</h2>
+  <div class="alert alert-error">
+    <strong>INTENTIONALLY VULNERABLE:</strong> Diese Seite zeigt absichtlich technische Systemdetails an.
+  </div>
+
+  <table class="results-table">
+    <tbody>
+      <tr>
+        <th>Fehlermeldung</th>
+        <td><code><%= errorMessage %></code></td>
+      </tr>
+      <tr>
+        <th>Datenbankpfad</th>
+        <td><code><%= dbPath %></code></td>
+      </tr>
+      <tr>
+        <th>Node.js Version</th>
+        <td><code><%= nodeVersion %></code></td>
+      </tr>
+      <tr>
+        <th>Plattform</th>
+        <td><code><%= platform %></code></td>
+      </tr>
+      <tr>
+        <th>Umgebung</th>
+        <td><code><%= env %></code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:1.5rem">Stack Trace</h3>
+  <pre class="stack-trace"><%= stack %></pre>
+</div>
+
+  </main>
+</body>
+</html>

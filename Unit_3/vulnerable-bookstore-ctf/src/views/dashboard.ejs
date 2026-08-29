@@ -1,0 +1,37 @@
+<%- include('layout', { title: 'Dashboard' }) %>
+
+<div class="card">
+  <h2>Willkommen, <strong><%= user.username %></strong>!</h2>
+  <p>Rolle: <span class="badge badge-role"><%= user.role %></span></p>
+</div>
+
+<div class="flag-box">
+  &#127381; <strong>FLAG{LOGIN_ENUMERATION_ERFOLGREICH}</strong> gefunden
+</div>
+
+<div class="card-grid">
+  <a href="/books" class="card card-link">
+    <div class="card-icon">&#128214;</div>
+    <h3>B&uuml;chersuche</h3>
+    <p>SQL Injection Demo</p>
+  </a>
+  <a href="/xss" class="card card-link">
+    <div class="card-icon">&#9889;</div>
+    <h3>XSS Demo</h3>
+    <p>Reflected XSS Demo</p>
+  </a>
+  <a href="/findings" class="card card-link">
+    <div class="card-icon">&#128269;</div>
+    <h3>Findings</h3>
+    <p>Schwachstellen&uuml;bersicht</p>
+  </a>
+  <a href="/debug/error" class="card card-link">
+    <div class="card-icon">&#128027;</div>
+    <h3>Debug Info</h3>
+    <p>Information Disclosure</p>
+  </a>
+</div>
+
+  </main>
+</body>
+</html>

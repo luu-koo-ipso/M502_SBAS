@@ -1,0 +1,14 @@
+{
+  "name": "monitoring-demo-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Demo Node.js App mit Prometheus Metriken fuer die Monitoring Schulung",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "prom-client": "^15.1.3"
+  }
+}

@@ -1,0 +1,29 @@
+<%- include('layout', { title: 'Login' }) %>
+
+<!-- Backup files available under /backup/ -->
+<div class="card login-card">
+  <h2>&#128274; Login</h2>
+
+  <% if (error) { %>
+    <!-- INTENTIONALLY VULNERABLE: Benutzername Enumeration – echter Fehler: <%= error %> -->
+    <div class="alert alert-error">Benutzername oder Passwort falsch</div>
+  <% } %>
+
+  <form method="POST" action="/login" autocomplete="off">
+    <div class="form-group">
+      <label for="username">Benutzername</label>
+      <input type="text" id="username" name="username" required placeholder="Benutzername">
+    </div>
+    <div class="form-group">
+      <label for="password">Passwort</label>
+      <input type="password" id="password" name="password" required placeholder="Passwort">
+    </div>
+    <button type="submit" class="btn btn-primary btn-block">Einloggen</button>
+  </form>
+
+  <a href="/backup/users.json" style="display:none">backup</a>
+</div>
+
+  </main>
+</body>
+</html>

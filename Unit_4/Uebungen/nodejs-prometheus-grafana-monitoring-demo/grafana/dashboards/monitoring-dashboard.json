@@ -1,0 +1,156 @@
+{
+  "id": null,
+  "uid": "nodejs-monitoring-demo",
+  "title": "Node.js Monitoring Demo",
+  "tags": ["monitoring", "demo", "nodejs"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Requests pro Sekunde",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total[1m]))",
+          "legendFormat": "requests/s",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "HTTP Requests nach Status",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total[1m])) by (status)",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Fehlgeschlagene Logins",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "rate(login_attempts_total{result=\"failed\"}[5m])",
+          "legendFormat": "failed logins/s",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Erfolgreiche Logins",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "rate(login_attempts_total{result=\"success\"}[5m])",
+          "legendFormat": "successful logins/s",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "SQL-Fehler",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "targets": [
+        {
+          "expr": "rate(sql_errors_total[5m])",
+          "legendFormat": "sql errors/s",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Security Events nach Typ",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "targets": [
+        {
+          "expr": "sum(rate(security_events_total[5m])) by (type)",
+          "legendFormat": "{{type}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "P95 Antwortzeit",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Node.js Memory Usage",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "targets": [
+        {
+          "expr": "nodejs_process_resident_memory_bytes",
+          "legendFormat": "resident memory",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Open Security Findings",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
+      "targets": [
+        {
+          "expr": "open_security_findings",
+          "legendFormat": "{{severity}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "App Up",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
+      "targets": [
+        {
+          "expr": "up{job=\"nodejs-monitoring-demo\"}",
+          "legendFormat": "up",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

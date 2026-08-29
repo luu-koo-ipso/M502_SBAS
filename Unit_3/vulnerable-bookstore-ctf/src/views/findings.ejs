@@ -1,0 +1,70 @@
+<%- include('layout', { title: 'Security Findings' }) %>
+
+<div class="card">
+  <h2>&#128269; Security Findings &ndash; &Uuml;bersicht</h2>
+  <p class="info">Analysiere die Applikation und dokumentiere deine Findings in folgenden Kategorien.</p>
+</div>
+
+<div class="card-grid findings-grid">
+  <div class="card finding-card">
+    <h3>1. Login Enumeration</h3>
+    <p><strong>Route:</strong> <code>/login</code></p>
+    <p>Untersuche die Fehlermeldungen bei falschen Anmeldedaten.</p>
+    <span class="badge badge-high">Hoch</span>
+  </div>
+
+  <div class="card finding-card">
+    <h3>2. Sensitive File Exposure</h3>
+    <p><strong>Route:</strong> <code>/backup/*</code></p>
+    <p>Suche mit OWASP ZAP nach &ouml;ffentlich erreichbaren Dateien.</p>
+    <span class="badge badge-high">Hoch</span>
+  </div>
+
+  <div class="card finding-card">
+    <h3>3. SQL Injection</h3>
+    <p><strong>Route:</strong> <code>/books/search</code></p>
+    <p>Teste die Sucheingabe auf SQL Injection.</p>
+    <span class="badge badge-critical">Kritisch</span>
+  </div>
+
+  <div class="card finding-card">
+    <h3>4. Reflected XSS</h3>
+    <p><strong>Route:</strong> <code>/xss</code></p>
+    <p>Teste den <code>message</code>-Parameter auf XSS.</p>
+    <span class="badge badge-high">Hoch</span>
+  </div>
+
+  <div class="card finding-card">
+    <h3>5. Information Disclosure</h3>
+    <p><strong>Route:</strong> <code>/debug/error</code></p>
+    <p>Untersuche den Debug-Endpunkt auf technische Informationen.</p>
+    <span class="badge badge-medium">Mittel</span>
+  </div>
+</div>
+
+<div class="card">
+  <h3>&#128203; Dokumentationsvorlage</h3>
+  <table class="results-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Schwachstelle</th>
+        <th>URL</th>
+        <th>Nachweis</th>
+        <th>Risiko</th>
+        <th>Massnahme</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Login Enumeration</td><td>/login</td><td>&nbsp;</td><td>Hoch</td><td>&nbsp;</td></tr>
+      <tr><td>2</td><td>Sensitive File Exposure</td><td>/backup/</td><td>&nbsp;</td><td>Hoch</td><td>&nbsp;</td></tr>
+      <tr><td>3</td><td>SQL Injection</td><td>/books/search</td><td>&nbsp;</td><td>Kritisch</td><td>&nbsp;</td></tr>
+      <tr><td>4</td><td>Reflected XSS</td><td>/xss</td><td>&nbsp;</td><td>Hoch</td><td>&nbsp;</td></tr>
+      <tr><td>5</td><td>Information Disclosure</td><td>/debug/error</td><td>&nbsp;</td><td>Mittel</td><td>&nbsp;</td></tr>
+    </tbody>
+  </table>
+</div>
+
+  </main>
+</body>
+</html>

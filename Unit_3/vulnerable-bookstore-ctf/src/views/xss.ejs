@@ -1,0 +1,38 @@
+<%- include('layout', { title: 'XSS Demo' }) %>
+
+<div class="card">
+  <h2>&#9889; XSS Demo &ndash; Reflected Cross-Site Scripting</h2>
+  <p class="info">
+    Hier wird der Parameter <code>message</code> absichtlich unsicher ausgegeben.
+  </p>
+
+  <form action="/xss" method="GET">
+    <div class="form-group">
+      <label for="message">Nachricht:</label>
+      <div class="search-row">
+        <input type="text" id="message" name="message"
+               value="<%= message !== null ? message : '' %>"
+               placeholder="z.B. Hallo Welt">
+        <button type="submit" class="btn btn-primary">Senden</button>
+      </div>
+    </div>
+  </form>
+
+  <% if (message !== null) { %>
+    <div class="xss-demo">
+      <h3>Ausgabe:</h3>
+      <!-- INTENTIONALLY VULNERABLE: Reflected XSS – raw HTML output -->
+      <div class="xss-output"><%- message %></div>
+    </div>
+  <% } %>
+</div>
+
+<div class="hint-box">
+  <h3>&#128161; Aufgabe f&uuml;r Studierende</h3>
+  <p>Teste den <code>message</code>-Parameter auf Reflected XSS.</p>
+  <p>Ziel: Einen JavaScript-Alert ausl&ouml;sen der <strong>FLAG{XSS_ERFOLGREICH}</strong> anzeigt.</p>
+</div>
+
+  </main>
+</body>
+</html>

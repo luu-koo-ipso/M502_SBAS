@@ -10,6 +10,9 @@ build/
 *.sqlite
 *.sqlite3
 
+# Prometheus local TSDB storage (created when running prometheus.exe without --storage.tsdb.path)
+Unit_4/Uebungen/nodejs-prometheus-grafana-monitoring-local/data/
+
 # Logs
 *.log
 npm-debug.log*

@@ -1,0 +1,61 @@
+<%- include('layout', { title: 'Büchersuche' }) %>
+
+<div class="card">
+  <h2>&#128214; B&uuml;chersuche</h2>
+  <p class="info">Suche nach B&uuml;chern nach Titel oder Autor.</p>
+  <form action="/books/search" method="GET">
+    <div class="form-group">
+      <label for="q">Suchbegriff:</label>
+      <div class="search-row">
+        <input type="text" id="q" name="q" value="<%= query %>" placeholder="z.B. Clean Code oder Robert">
+        <button type="submit" class="btn btn-primary">Suchen</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<% if (error) { %>
+  <div class="alert alert-error">
+    <strong>&#9888; Fehler:</strong> <%= error %>
+  </div>
+<% } %>
+
+<% if (flagFound) { %>
+  <div class="flag-box">
+    &#127381; <strong>FLAG{SQL_INJECTION_ERFOLGREICH}</strong> gefunden
+  </div>
+<% } %>
+
+<% if (results !== null) { %>
+  <div class="card">
+    <h3>Suchergebnisse (<%= results.length %> Treffer)</h3>
+    <% if (results.length > 0) { %>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Titel</th>
+            <th>Autor</th>
+            <th>Kategorie</th>
+            <th>Preis</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% results.forEach(row => { %>
+            <tr>
+              <% Object.values(row).forEach(val => { %>
+                <td><%= val %></td>
+              <% }) %>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p class="info">Keine Ergebnisse gefunden.</p>
+    <% } %>
+  </div>
+<% } %>
+
+  </main>
+</body>
+</html>
